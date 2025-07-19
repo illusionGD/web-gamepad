@@ -3,9 +3,14 @@ import { ref } from 'vue'
 import {
   createGamepadController,
   initGamepad,
-  switchGamepadController
+  INPUT_TYPE,
+  startListening,
+  stopListening,
+  switchGamepadController,
+  GAMEPAD_BTN_KEY_MAP,
+  GAMEPAD_BTN_UI_MAP,
+  type GamepadControllerType
 } from 'web-gamepad'
-import { GAMEPAD_BTN_KEY_MAP } from 'web-gamepad/src/constants'
 
 defineProps<{ msg: string }>()
 
@@ -13,20 +18,31 @@ const count = ref(0)
 initGamepad()
 const controller = createGamepadController('ctrl')
 const controller2 = createGamepadController('ctrl2')
-controller.addBtnEvents(GAMEPAD_BTN_KEY_MAP.A, 'down', () => {
-  console.log('🚀 ~ controller.addBtnEvents ~ controller:', controller)
-  count.value++
-})
-controller2.addBtnEvents(GAMEPAD_BTN_KEY_MAP.A, 'down', () => {
-  console.log('🚀 ~ controller2.addBtnEvents ~ controller2:', controller2)
-  count.value--
-})
-controller2.disable()
-
+// controller2.disable()
+initAllBtns(controller)
+initAllBtns(controller2)
+function initAllBtns(controller: GamepadControllerType) {
+  Object.values(GAMEPAD_BTN_KEY_MAP).forEach((key) => {
+    if (key === GAMEPAD_BTN_KEY_MAP.LS || key === GAMEPAD_BTN_KEY_MAP.RS) {
+      controller.addBtnEvents(key, INPUT_TYPE.axes, ([x, y]) => {
+        console.log(controller.key + ' x, y:', x, y)
+      })
+    }
+    controller.addBtnEvents(key, 'down', () => {
+      console.log(controller.key + 'BtnEvents:', GAMEPAD_BTN_UI_MAP[key])
+    })
+  })
+}
 // 测试切换controller
 setTimeout(() => {
-  switchGamepadController('ctrl2')
+  switchGamepadController(controller2.id)
 }, 3000)
+setTimeout(() => {
+  stopListening()
+  setTimeout(() => {
+    startListening()
+  }, 2000)
+}, 5000)
 </script>
 
 <template>

@@ -23,9 +23,10 @@
         "main": "dist/cjs/index.js",
         "module": "dist/esm/index.js",
         "types": "dist/index.d.ts",
+        "type": "module",
         "exports": {
             ".": {
-                "types": "./dist/index.d.ts",
+                "types": "dist/index.d.ts",
                 "import": "./dist/esm/index.js",
                 "require": "./dist/cjs/index.js"
             }
@@ -45,5 +46,8 @@
         "@rollup/plugin-terser": "^0.4.4",
         "@rollup/plugin-typescript": "^12.1.2",
         "@types/node": "^22.13.9"
+    },
+    "dependencies": {
+        "uuid": "^11.1.0"
     }
 }

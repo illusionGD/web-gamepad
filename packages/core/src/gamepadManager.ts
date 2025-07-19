@@ -1,21 +1,36 @@
-import { GAMEPAD_BTN_UI_MAP, GamepadBtnKeyType } from './constants'
-import {  getActiveControllers, INPUT_TYPE } from './gamepadController'
+import {
+  GAMEPAD_BTN_KEY_MAP,
+} from './constants'
+import { getActiveControllers, INPUT_TYPE } from './gamepadController'
+import { GamepadBtnKeyType } from './types'
 
 const GamepadManager: {
   [key: number]: Gamepad
 } = {}
 
-
 let frameId = 0
 let currentGamepad: Gamepad | null
+let isStop = false
+let isInit = false
 
-// 初始化
+/** initialize gamepad */
 export function initGamepad() {
-  // 校验是否支持gamepad
+    if (isInit) {
+        return
+    }
+  // Verify whether gamepad is supported
   if (!isGamepadSupported()) {
     throw new Error('not support gamepad')
   }
-  // 初始化手柄事件监听
+
+  initEventListening()
+  isInit = true
+}
+
+/**
+ * Initialize the handle event listener
+ */
+function initEventListening() {
   window.addEventListener(
     'gamepadconnected',
     function ({ gamepad }: GamepadEvent) {
@@ -29,21 +44,50 @@ export function initGamepad() {
     }
   )
 
-  // 卸载游戏手柄
   window.addEventListener(
     'gamepaddisconnected',
     ({ gamepad }: GamepadEvent) => {
       removeGamepad(gamepad)
-      cancelAnimationFrame(frameId)
+
+      if (!Object.keys(GamepadManager).length) {
+        destroyGamepad()
+      }
     }
   )
 }
-// 增加gamepad
+
+/** stop listen */
+export function stopListening() {
+  isStop = true
+}
+
+/** start listen */
+export function startListening() {
+  isStop = false
+  gamepadLoop()
+}
+
+/** destroy listen */
+export function destroyGamepad() {
+  cancelIdleCallback(frameId)
+  stopListening()
+  Object.keys(GamepadManager).forEach(
+    (index) => delete GamepadManager[Number(index)]
+  )
+}
+
+/**
+ * add gamepad
+ * @param gamepad 
+ */
 export function addGamepad(gamepad: Gamepad) {
   GamepadManager[gamepad.index] = gamepad
 }
 
-// 移除gamepad
+/**
+ * remove gamepad
+ * @param gamepad 
+ */
 export function removeGamepad(gamepad: Gamepad | number) {
   const index = typeof gamepad === 'number' ? gamepad : gamepad.index
   delete GamepadManager[index]
@@ -52,15 +96,23 @@ export function removeGamepad(gamepad: Gamepad | number) {
   }
 }
 
-// 获取gamepad列表
+/**
+ * get gamepad list
+ */
 export function getGamepadList() {
   return Object.values(GamepadManager)
 }
 
-// 循环监听手柄输入
+/**
+ * Loop monitor the input of the handle
+ */
 function gamepadLoop() {
+  if (isStop) {
+    return
+  }
   frameId = requestAnimationFrame(() => {
-    // 遍历全部手柄
+    const controllers = getActiveControllers()
+    // Traverse all the handles
     for (const key in GamepadManager) {
       if (Object.prototype.hasOwnProperty.call(GamepadManager, key)) {
         const newGamepad = navigator.getGamepads()[Number(key)]
@@ -70,22 +122,52 @@ function gamepadLoop() {
         }
 
         const gamepad = GamepadManager[key]
+        GamepadManager[key] = newGamepad
 
-        // 前后两次按钮快照
+        // Two snapshots of the buttons before and after
         for (let index = 0; index < newGamepad.buttons.length; index++) {
           const btn = newGamepad.buttons[index]
           if (btn.pressed !== gamepad.buttons[index].pressed) {
             const key = index as GamepadBtnKeyType
-            const controllers = getActiveControllers()
             controllers.forEach((ctl) => {
-                if (!ctl.checkBtnEventsExits(key)) {
-                    return
-                }
-                ctl.doneBtnEvents(key, btn.pressed ? INPUT_TYPE.down : INPUT_TYPE.up)
+              if (!ctl.checkBtnEventsExits(key)) {
+                return
+              }
+              ctl.emitsBtnEvents(
+                key,
+                btn.pressed ? INPUT_TYPE.down : INPUT_TYPE.up
+              )
             })
           }
         }
-        GamepadManager[key] = newGamepad
+
+        // Joystick change
+        const [newLsX, newLsY, newRsX, newRsY] = newGamepad.axes
+        const [lsX, lsY, rsX, rsY] = gamepad.axes
+        // left Joystick
+        if (Math.abs(newLsX - lsX) > 0.01 || Math.abs(newLsY - lsY) > 0.01) {
+          controllers.forEach((ctrl) => {
+            if (!ctrl.checkBtnEventsExits(GAMEPAD_BTN_KEY_MAP.LS)) {
+              return
+            }
+            ctrl.emitsBtnEvents(GAMEPAD_BTN_KEY_MAP.LS, INPUT_TYPE.axes, [
+              newLsX,
+              newLsY
+            ])
+          })
+        }
+        // right Joystick
+        if (Math.abs(newRsX - rsX) > 0.01 || Math.abs(newRsY - rsY) > 0.01) {
+          controllers.forEach((ctrl) => {
+            if (!ctrl.checkBtnEventsExits(GAMEPAD_BTN_KEY_MAP.RS)) {
+              return
+            }
+            ctrl.emitsBtnEvents(GAMEPAD_BTN_KEY_MAP.RS, INPUT_TYPE.axes, [
+              newRsX,
+              newRsY
+            ])
+          })
+        }
       }
     }
 
@@ -93,12 +175,9 @@ function gamepadLoop() {
   })
 }
 
-function isGamepadSupported() {
-  const gamepadKey = [
-    'getGamepads',
-    'webkitGetGamepads',
-    'mozGetGamepads',
-    'msGetGamepads'
-  ]
-  return gamepadKey.some((key) => key in navigator)
+/**
+ * Does it support a controller
+ */
+export function isGamepadSupported() {
+  return 'getGamepads' in navigator
 }

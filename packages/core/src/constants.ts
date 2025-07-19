@@ -40,5 +40,3 @@ export const GAMEPAD_BTN_KEY_MAP = {
   other: 16
 } as const
 
-export type GamepadBtnKeyType = keyof typeof GAMEPAD_BTN_UI_MAP
-export type UiMapValueType = (typeof GAMEPAD_BTN_UI_MAP)[GamepadBtnKeyType] & {}
