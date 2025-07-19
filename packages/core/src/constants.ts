@@ -1,26 +1,7 @@
-// 按键ui映射
-export const GAMEPAD_BTN_UI_MAP = {
-  0: 'A',
-  1: 'B',
-  2: 'X',
-  3: 'Y',
-  4: 'LT',
-  5: 'RT',
-  6: 'LB',
-  7: 'RB',
-  8: 'select/back',
-  9: 'select/forward',
-  10: 'LS',
-  11: 'RS',
-  12: 'up',
-  13: 'down',
-  14: 'left',
-  15: 'right',
-  16: 'other'
-} as const
+import { InitAxesConfigType } from './types'
 
-// 手柄key映射
-export const GAMEPAD_BTN_KEY_MAP = {
+/** xbox key map */
+export const XBOX_KEY_MAP = {
   A: 0,
   B: 1,
   X: 2,
@@ -37,6 +18,61 @@ export const GAMEPAD_BTN_KEY_MAP = {
   down: 13,
   left: 14,
   right: 15,
-  other: 16
+  home: 16
 } as const
 
+/** ps5 key map */
+export const PS5_BUTTON_MAP = {
+  Cross: 0,
+  Circle: 1,
+  Square: 2,
+  Triangle: 3,
+  L1: 4,
+  R1: 5,
+  L2: 6,
+  R2: 7,
+  Share: 8,
+  Options: 9,
+  L3: 10,
+  R3: 11,
+  PS: 12,
+  Touchpad: 13,
+  Microphone: 14,
+  DpadUp: 15,
+  DpadDown: 16,
+  DpadLeft: 17,
+  DpadRight: 18
+} as const
+
+/** gamepad */
+export const GAMEPAD_BTN_KEY_MAP = XBOX_KEY_MAP
+
+/** axes btn key map */
+export const AXES_BTN_KEY_MAP = {
+  LS: 10,
+  RS: 11
+}
+
+export let OFFSET_MIN = 0.1
+
+export function setAxesConfig({
+  left,
+  right,
+  accuracy
+}: InitAxesConfigType) {
+  if (left !== undefined && typeof left === 'number') {
+    AXES_BTN_KEY_MAP.LS = left
+  }
+
+  if (right !== undefined && typeof right === 'number') {
+    AXES_BTN_KEY_MAP.RS = right
+  }
+
+  if (accuracy !== undefined && typeof accuracy === 'number') {
+    OFFSET_MIN = clamp(accuracy, 0, 1)
+  }
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}

@@ -10,7 +10,21 @@
       width="500"
       :before-close="handleClose"
     >
-      <span>This is a message</span>
+      <div
+        ref="textRef"
+        class="a-t"
+        style="height: 200; width: '100%'; overflow: auto"
+      >
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+      </div>
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="dialogVisible = false">B</el-button>
@@ -43,14 +57,14 @@
 import { ref } from 'vue'
 import {
   createGamepadController,
-  GAMEPAD_BTN_KEY_MAP,
+  XBOX_KEY_MAP,
   INPUT_TYPE,
   switchGamepadController
 } from 'web-gamepad'
 const dialogVisible = ref(false)
 const drawer = ref(false)
 const radio1 = ref('1')
-
+const textRef = ref<HTMLElement | null>()
 const controller = createGamepadController('btn1')
 const popController = createGamepadController('pop', false)
 const drawerController = createGamepadController('drawer', false)
@@ -58,9 +72,9 @@ addEvents()
 
 function addEvents() {
   // 打开对话框
-  controller.addBtnEvents(GAMEPAD_BTN_KEY_MAP.A, INPUT_TYPE.down, open)
+  controller.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, open)
   controller.addBtnEvents(
-    GAMEPAD_BTN_KEY_MAP['select/forward'],
+    XBOX_KEY_MAP['select/forward'],
     INPUT_TYPE.down,
     () => {
       drawer.value = true
@@ -70,32 +84,36 @@ function addEvents() {
   )
 
   // 对话框确认
-  popController.addBtnEvents(GAMEPAD_BTN_KEY_MAP.A, INPUT_TYPE.down, () => {
+  popController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, () => {
     dialogVisible.value = false
     handleClose()
   })
 
   // 对话框取消
-  popController.addBtnEvents(GAMEPAD_BTN_KEY_MAP.B, INPUT_TYPE.down, () => {
+  popController.addBtnEvents(XBOX_KEY_MAP.B, INPUT_TYPE.down, () => {
     dialogVisible.value = false
     handleClose()
   })
+  let oldY = 0
+  let oldTop = 0
+  let dist = 0
+  // 滚动
+  popController.addBtnEvents(XBOX_KEY_MAP.RS, INPUT_TYPE.axes, ([x, y]) => {
+    const direct = y < 0 ? -1 : 1
+    dist = Math.abs(Math.abs(y) - oldY) * direct
+    oldTop += dist * 20
+    if (textRef.value) {
+      textRef.value.scrollTop = oldTop
+    }
+  })
 
   // drawer确认
-  drawerController.addBtnEvents(
-    GAMEPAD_BTN_KEY_MAP.A,
-    INPUT_TYPE.down,
-    confirmClick
-  )
-  drawerController.addBtnEvents(
-    GAMEPAD_BTN_KEY_MAP.B,
-    INPUT_TYPE.down,
-    cancelClick
-  )
-  drawerController.addBtnEvents(GAMEPAD_BTN_KEY_MAP.LT, INPUT_TYPE.down, () => {
+  drawerController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, confirmClick)
+  drawerController.addBtnEvents(XBOX_KEY_MAP.B, INPUT_TYPE.down, cancelClick)
+  drawerController.addBtnEvents(XBOX_KEY_MAP.LT, INPUT_TYPE.down, () => {
     radio1.value = '1'
   })
-  drawerController.addBtnEvents(GAMEPAD_BTN_KEY_MAP.RT, INPUT_TYPE.down, () => {
+  drawerController.addBtnEvents(XBOX_KEY_MAP.RT, INPUT_TYPE.down, () => {
     radio1.value = '2'
   })
 }
@@ -121,16 +139,8 @@ function handleClose() {
 console.log('🚀 ~ controller:', controller)
 </script>
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.a-t {
+  height: 200px;
+  width: 100%;
 }
 </style>

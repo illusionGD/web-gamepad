@@ -1,6 +1,6 @@
-import { GAMEPAD_BTN_KEY_MAP } from './constants'
+import { AXES_BTN_KEY_MAP } from './constants'
 import { v4 as uuidv4 } from 'uuid'
-import { AxesFnType, GamepadBtnKeyType, GamepadControllerType, GamepadEventMapType } from './types'
+import { AxesFnType,  GamepadControllerType, GamepadEventMapType } from './types'
 
 /**
  * input type: down | up | axes
@@ -24,7 +24,7 @@ const ControllerManager = new Map<string, GamepadControllerType>()
  */
 export function createGamepadController(key: string, isActive: boolean = true) {
   // Button event bucket
-  const btnEventsMap = new Map<GamepadBtnKeyType, GamepadEventMapType>()
+  const btnEventsMap = new Map<number, GamepadEventMapType>()
   const ctrlKey = key
   const id = uuidv4()
   let active = isActive
@@ -40,7 +40,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * @param fn
      */
     addBtnEvents: (
-      key: GamepadBtnKeyType,
+      key: number,
       inputType: InputEventType,
       fn: Function | AxesFnType
     ) => {
@@ -49,7 +49,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
       if (bucket) {
         // axes bucket requires AxesFnType
         if (
-          (key === GAMEPAD_BTN_KEY_MAP.LS || key === GAMEPAD_BTN_KEY_MAP.RS) &&
+          (key === AXES_BTN_KEY_MAP.LS || key === AXES_BTN_KEY_MAP.RS) &&
           inputType === INPUT_TYPE.axes
         ) {
           (bucket as Set<AxesFnType>).add(fn as AxesFnType)
@@ -73,7 +73,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
           : newBucket.onUpBucket.add(fn as Function)
       } else {
         // axes
-        if (key === GAMEPAD_BTN_KEY_MAP.LS || key === GAMEPAD_BTN_KEY_MAP.RS) {
+        if (key === AXES_BTN_KEY_MAP.LS || key === AXES_BTN_KEY_MAP.RS) {
           newBucket.onAxesBucket.add(fn as AxesFnType)
         }
       }
@@ -89,7 +89,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * @param fn
      */
     removeBtnEvents: (
-      key: GamepadBtnKeyType,
+      key: number,
       inputType: InputEventType,
       fn: Function
     ) => {
@@ -102,7 +102,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * Disable button event
      * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
      */
-    bandBtnEvents: (key: GamepadBtnKeyType | GamepadBtnKeyType[]) => {
+    bandBtnEvents: (key: number | number[]) => {
       const keys = key instanceof Array ? key : [key]
       keys.forEach((item) => {
         const eventSet = btnEventsMap.get(item)
@@ -117,7 +117,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * Verify whether the button event exists
      * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
      */
-    checkBtnEventsExits(key: GamepadBtnKeyType) {
+    checkBtnEventsExits(key: number) {
       return btnEventsMap.has(key)
     },
 
@@ -128,7 +128,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * @param params
      */
     emitsBtnEvents: (
-      key: GamepadBtnKeyType,
+      key: number,
       inputType: InputEventType,
       params?: any
     ) => {
@@ -162,9 +162,9 @@ export function createGamepadController(key: string, isActive: boolean = true) {
  * @param btnEventsMap
  */
 function getBucketByInputType(
-  key: GamepadBtnKeyType,
+  key: number,
   inputType: InputEventType,
-  btnEventsMap: Map<GamepadBtnKeyType, GamepadEventMapType>
+  btnEventsMap: Map<number, GamepadEventMapType>
 ) {
   const eventSet = btnEventsMap.get(key)
   if (!eventSet) {
@@ -175,7 +175,7 @@ function getBucketByInputType(
   }
   // axes
   if (
-    (key === GAMEPAD_BTN_KEY_MAP.LS || key === GAMEPAD_BTN_KEY_MAP.RS) &&
+    (key === AXES_BTN_KEY_MAP.LS || key === AXES_BTN_KEY_MAP.RS) &&
     inputType === INPUT_TYPE.axes
   ) {
     return eventSet.onAxesBucket

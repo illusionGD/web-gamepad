@@ -1,5 +1,4 @@
-import { GAMEPAD_BTN_UI_MAP } from "./constants"
-import { createGamepadController } from "./gamepadController"
+import { createGamepadController } from './gamepadController'
 
 export type GamepadEventMapType = {
   isBand: boolean
@@ -9,5 +8,9 @@ export type GamepadEventMapType = {
 } & {}
 export type GamepadControllerType = ReturnType<typeof createGamepadController>
 export type AxesFnType = (params: number[]) => void
-export type GamepadBtnKeyType = keyof typeof GAMEPAD_BTN_UI_MAP
-export type UiMapValueType = (typeof GAMEPAD_BTN_UI_MAP)[GamepadBtnKeyType] & {}
+export type InitAxesConfigType = {
+  left?: number
+  right?: number
+  /** axes accuracy: 0-1 */
+  accuracy?: number
+} & {}

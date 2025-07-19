@@ -7,11 +7,28 @@ import {
   startListening,
   stopListening,
   switchGamepadController,
-  GAMEPAD_BTN_KEY_MAP,
-  GAMEPAD_BTN_UI_MAP,
+  XBOX_KEY_MAP,
   type GamepadControllerType
 } from 'web-gamepad'
-
+export const GAMEPAD_BTN_UI_MAP = {
+  0: 'A',
+  1: 'B',
+  2: 'X',
+  3: 'Y',
+  4: 'LT',
+  5: 'RT',
+  6: 'LB',
+  7: 'RB',
+  8: 'select/back',
+  9: 'select/forward',
+  10: 'LS',
+  11: 'RS',
+  12: 'up',
+  13: 'down',
+  14: 'left',
+  15: 'right',
+  16: 'other'
+} as const
 defineProps<{ msg: string }>()
 
 const count = ref(0)
@@ -22,8 +39,8 @@ const controller2 = createGamepadController('ctrl2')
 initAllBtns(controller)
 initAllBtns(controller2)
 function initAllBtns(controller: GamepadControllerType) {
-  Object.values(GAMEPAD_BTN_KEY_MAP).forEach((key) => {
-    if (key === GAMEPAD_BTN_KEY_MAP.LS || key === GAMEPAD_BTN_KEY_MAP.RS) {
+  Object.values(XBOX_KEY_MAP).forEach((key) => {
+    if (key === XBOX_KEY_MAP.LS || key === XBOX_KEY_MAP.RS) {
       controller.addBtnEvents(key, INPUT_TYPE.axes, ([x, y]) => {
         console.log(controller.key + ' x, y:', x, y)
       })

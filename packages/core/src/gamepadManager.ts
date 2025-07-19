@@ -1,8 +1,6 @@
-import {
-  GAMEPAD_BTN_KEY_MAP,
-} from './constants'
+import { AXES_BTN_KEY_MAP, OFFSET_MIN, setAxesConfig } from './constants'
 import { getActiveControllers, INPUT_TYPE } from './gamepadController'
-import { GamepadBtnKeyType } from './types'
+import { InitAxesConfigType } from './types'
 
 const GamepadManager: {
   [key: number]: Gamepad
@@ -14,10 +12,16 @@ let isStop = false
 let isInit = false
 
 /** initialize gamepad */
-export function initGamepad() {
-    if (isInit) {
-        return
-    }
+export function initGamepad(config?: {
+    /** axes config */
+    axes?: InitAxesConfigType
+}) {
+  if (isInit) {
+    return
+  }
+  if (config && config.axes) {
+    setAxesConfig(config.axes)
+  }
   // Verify whether gamepad is supported
   if (!isGamepadSupported()) {
     throw new Error('not support gamepad')
@@ -78,7 +82,7 @@ export function destroyGamepad() {
 
 /**
  * add gamepad
- * @param gamepad 
+ * @param gamepad
  */
 export function addGamepad(gamepad: Gamepad) {
   GamepadManager[gamepad.index] = gamepad
@@ -86,7 +90,7 @@ export function addGamepad(gamepad: Gamepad) {
 
 /**
  * remove gamepad
- * @param gamepad 
+ * @param gamepad
  */
 export function removeGamepad(gamepad: Gamepad | number) {
   const index = typeof gamepad === 'number' ? gamepad : gamepad.index
@@ -128,7 +132,7 @@ function gamepadLoop() {
         for (let index = 0; index < newGamepad.buttons.length; index++) {
           const btn = newGamepad.buttons[index]
           if (btn.pressed !== gamepad.buttons[index].pressed) {
-            const key = index as GamepadBtnKeyType
+            const key = index
             controllers.forEach((ctl) => {
               if (!ctl.checkBtnEventsExits(key)) {
                 return
@@ -145,24 +149,24 @@ function gamepadLoop() {
         const [newLsX, newLsY, newRsX, newRsY] = newGamepad.axes
         const [lsX, lsY, rsX, rsY] = gamepad.axes
         // left Joystick
-        if (Math.abs(newLsX - lsX) > 0.01 || Math.abs(newLsY - lsY) > 0.01) {
+        if (Math.abs(newLsX - lsX) > OFFSET_MIN || Math.abs(newLsY - lsY) > OFFSET_MIN) {
           controllers.forEach((ctrl) => {
-            if (!ctrl.checkBtnEventsExits(GAMEPAD_BTN_KEY_MAP.LS)) {
+            if (!ctrl.checkBtnEventsExits(AXES_BTN_KEY_MAP.LS)) {
               return
             }
-            ctrl.emitsBtnEvents(GAMEPAD_BTN_KEY_MAP.LS, INPUT_TYPE.axes, [
+            ctrl.emitsBtnEvents(AXES_BTN_KEY_MAP.LS, INPUT_TYPE.axes, [
               newLsX,
               newLsY
             ])
           })
         }
         // right Joystick
-        if (Math.abs(newRsX - rsX) > 0.01 || Math.abs(newRsY - rsY) > 0.01) {
+        if (Math.abs(newRsX - rsX) > OFFSET_MIN || Math.abs(newRsY - rsY) > OFFSET_MIN) {
           controllers.forEach((ctrl) => {
-            if (!ctrl.checkBtnEventsExits(GAMEPAD_BTN_KEY_MAP.RS)) {
+            if (!ctrl.checkBtnEventsExits(AXES_BTN_KEY_MAP.RS)) {
               return
             }
-            ctrl.emitsBtnEvents(GAMEPAD_BTN_KEY_MAP.RS, INPUT_TYPE.axes, [
+            ctrl.emitsBtnEvents(AXES_BTN_KEY_MAP.RS, INPUT_TYPE.axes, [
               newRsX,
               newRsY
             ])
