@@ -1,9 +1,32 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import {
+  createGamepadController,
+  initGamepad,
+  switchGamepadController
+} from 'web-gamepad'
+import { GAMEPAD_BTN_KEY_MAP } from 'web-gamepad/src/constants'
 
 defineProps<{ msg: string }>()
 
 const count = ref(0)
+initGamepad()
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl2')
+controller.addBtnEvents(GAMEPAD_BTN_KEY_MAP.A, 'down', () => {
+  console.log('🚀 ~ controller.addBtnEvents ~ controller:', controller)
+  count.value++
+})
+controller2.addBtnEvents(GAMEPAD_BTN_KEY_MAP.A, 'down', () => {
+  console.log('🚀 ~ controller2.addBtnEvents ~ controller2:', controller2)
+  count.value--
+})
+controller2.disable()
+
+// 测试切换controller
+setTimeout(() => {
+  switchGamepadController('ctrl2')
+}, 3000)
 </script>
 
 <template>

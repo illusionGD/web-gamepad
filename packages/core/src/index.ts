@@ -1,5 +1,3 @@
 
-export function testGamepad() {
-console.log('test');
-
-}
+export * from './gamepadManager'
+export * from './gamepadController'

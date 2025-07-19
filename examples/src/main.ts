@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import { testGamepad } from 'web-gamepad'
-testGamepad()
+import { createGamepadController, initGamepad } from 'web-gamepad'
+
 createApp(App).mount('#app')
