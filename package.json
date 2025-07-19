@@ -1,0 +1,39 @@
+{
+  "name": "web-gamepad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint --fix",
+    "commit": "git add . && git-cz",
+    "push": "npm run commit && git push --follow-tags",
+    "prepare": "husky install",
+    "release": "changeset add && changeset version",
+    "publish:release": "npm run release && npm run push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.5",
+    "@eslint/js": "^9.31.0",
+    "@types/node": "^24.0.15",
+    "changeset": "^0.2.6",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.37.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
