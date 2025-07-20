@@ -231,6 +231,36 @@ switchGamepadController(drawerController.id)
 // Switch multiple
 // switchGamepadController([drawerController.id,popController.id]) 
 ```
+## recallController
+recall controller
+```ts
+import {
+  createGamepadController,
+  XBOX_KEY_MAP,
+  INPUT_TYPE,
+  recallController,
+  switchGamepadController
+} from 'web-gamepad'
+const dialogVisible = ref(false)
+const controller = createGamepadController('btn1')
+const popController = createGamepadController('pop', false)
+controller.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, open)
+
+popController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, () => {
+  dialogVisible.value = false
+  handleClose()
+})
+
+function open() {
+  dialogVisible.value = true
+  switchGamepadController(popController.id)
+}
+
+// When closing the pop-up window, roll back the first bit of activated controllers
+function handleClose() {
+  recallController(1)
+}
+```
 
 ## getActiveControllers
 
