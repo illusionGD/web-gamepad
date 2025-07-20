@@ -72,11 +72,11 @@ controller.addBtnEvents(XBOX_KEY_MAP.RS, INPUT_TYPE.axes, ([x, y]) => {
 
 # Configuration
 
-| 变量名            | 类型                         | 默认  | 描述                                                                                                                               |
+| Variable Name            | Type                         | default  | Default                                                                                                                               |
 | -------------- | -------------------------- | --- | -------------------------------------------------------------------------------------------------------------------------------- |
 | axes           | object                     |     | Optional,Joystick configuration, not required for standard gamepads, configure left and right joystick keys for special gamepads |
-| onConnected    | (gamepad: Gamepad) => void | 无   | Callback when gamepad is connected                                                                                               |
-| onDisconnected | (gamepad: Gamepad) => void | 无   | Callback when gamepad is disconnected                                                                                            |
+| onConnected    | (gamepad: Gamepad) => void |    | Callback when gamepad is connected                                                                                               |
+| onDisconnected | (gamepad: Gamepad) => void |    | Callback when gamepad is disconnected                                                                                            |
 
 # Variables
 
@@ -140,7 +140,7 @@ const PS5_BUTTON_MAP = {
 
 Controller type
 
-| 名称                    | 类型       | 说明                                   |
+| Name                    | Type       | Description                                   |
 | --------------------- | -------- | ------------------------------------ |
 | id                    | string   | uuid                                 |
 | key                   | string   | Custom key                           |
@@ -174,12 +174,12 @@ Initialize the gamepad
 
 ```ts
 initGamepad({
-  /** 手柄链接时回调 */
+  /** Callback when gamepad is connected */
   onConnected: (gamepad: Gamepad) => {},
-  /** 手柄断开链接时回调 */
+  /** Callback when gamepad is disconnected */
   onDisconnected: (gamepad: Gamepad) => {},
   axes: {
-    /** 监听手柄摇杆变化精度 */
+    /** Precision for monitoring joystick changes */
     accuracy: 0.001
   }
 })
@@ -195,7 +195,7 @@ Parameters：
 
 - isActive：Boolean，optional, default true, whether to activate the controller
 
-案例：
+Example：
 
 ```ts
 import {
