@@ -53,5 +53,5 @@ jobs:
       - name: Publish Packages
         run: pnpm changeset publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_WEB_GAMEPAD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
