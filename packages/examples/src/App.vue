@@ -40,8 +40,8 @@
       </template>
       <template #default>
         <div>
-          <el-radio v-model="radio1" value="1" size="large"> LT </el-radio>
-          <el-radio v-model="radio1" value="2" size="large"> RT </el-radio>
+          <el-radio v-model="radio1" value="1" size="large"> LB </el-radio>
+          <el-radio v-model="radio1" value="2" size="large"> RB </el-radio>
         </div>
       </template>
       <template #footer>
@@ -59,13 +59,15 @@ import {
   createGamepadController,
   XBOX_KEY_MAP,
   INPUT_TYPE,
-  switchGamepadController
+  switchGamepadController,
+  recallController
 } from 'web-gamepad'
 const dialogVisible = ref(false)
 const drawer = ref(false)
 const radio1 = ref('1')
 const textRef = ref<HTMLElement | null>()
 const controller = createGamepadController('btn1')
+const controller2 = createGamepadController('btn2', false)
 const popController = createGamepadController('pop', false)
 const drawerController = createGamepadController('drawer', false)
 addEvents()
@@ -75,9 +77,18 @@ function addEvents() {
   controller.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, open)
   controller.addBtnEvents(XBOX_KEY_MAP.menu, INPUT_TYPE.down, () => {
     drawer.value = true
-    // 先切换drawerController
-    switchGamepadController(drawerController.id)
+    // 切换drawerController
+    controller.disable()
+    drawerController.active()
+    controller2.active()
+    // switchGamepadController([
+    //   drawerController.id,
+    //   controller2.id,
+    //   controller2.id
+    // ])
   })
+
+  controller2.addBtnEvents(XBOX_KEY_MAP.Y, INPUT_TYPE.down, open)
 
   // 对话框确认
   popController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, () => {
@@ -106,10 +117,10 @@ function addEvents() {
   // drawer确认
   drawerController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, confirmClick)
   drawerController.addBtnEvents(XBOX_KEY_MAP.B, INPUT_TYPE.down, cancelClick)
-  drawerController.addBtnEvents(XBOX_KEY_MAP.LT, INPUT_TYPE.down, () => {
+  drawerController.addBtnEvents(XBOX_KEY_MAP.LB, INPUT_TYPE.down, () => {
     radio1.value = '1'
   })
-  drawerController.addBtnEvents(XBOX_KEY_MAP.RT, INPUT_TYPE.down, () => {
+  drawerController.addBtnEvents(XBOX_KEY_MAP.RB, INPUT_TYPE.down, () => {
     radio1.value = '2'
   })
 }
@@ -117,7 +128,7 @@ function addEvents() {
 function cancelClick() {
   drawer.value = false
   // 切回第一个controller
-  switchGamepadController(controller.id)
+  recallController(1)
 }
 
 function confirmClick() {
@@ -130,7 +141,7 @@ function open() {
 }
 
 function handleClose() {
-  switchGamepadController(drawer.value ? drawerController.id : controller.id)
+  recallController(1)
 }
 console.log('🚀 ~ controller:', controller)
 </script>

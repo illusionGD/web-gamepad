@@ -1,6 +1,7 @@
 import { AXES_BTN_KEY_MAP } from './constants'
 import { v4 as uuidv4 } from 'uuid'
 import { AxesFnType, GamepadControllerType, GamepadEventMapType } from './types'
+import { clamp, uniqueArray } from './utils'
 
 /**
  * input type: down | up | axes
@@ -13,8 +14,13 @@ export const INPUT_TYPE = {
 
 export type InputEventType = keyof typeof INPUT_TYPE
 
+/** controller id stack */
+const idStack: string[] = []
+
 /** controller manager */
 const ControllerManager = new Map<string, GamepadControllerType>()
+
+let idLen = 0
 
 /**
  * Create a handle controller
@@ -26,12 +32,14 @@ export function createGamepadController(key: string, isActive: boolean = true) {
   // Button event bucket
   const btnEventsMap = new Map<number, GamepadEventMapType>()
   const ctrlKey = key
-  const id = uuidv4()
+  const id: string = `${idLen}-${key}`
   let active = isActive
+
+  idLen += 1
 
   const ctrl = {
     id,
-    
+
     key: ctrlKey,
 
     /**
@@ -138,12 +146,18 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     /**
      * disable current controller
      */
-    disable: () => (active = false),
+    disable: () => {
+      recordActiveIdStack()
+      active = false
+    },
 
     /**
      * activate current controller
      */
-    active: () => (active = true),
+    active: () => {
+      recordActiveIdStack()
+      active = true
+    },
 
     /**
      * destroy current controller
@@ -194,9 +208,10 @@ function getBucketByInputType(
 
 /** Get the activated controller */
 export function getActiveControllers() {
-  return Array.from(ControllerManager.values()).filter((item) =>
+  const list = Array.from(ControllerManager.values()).filter((item) =>
     item.isActive()
   )
+  return list
 }
 
 /**
@@ -204,7 +219,7 @@ export function getActiveControllers() {
  * @param id
  */
 export function switchGamepadController(id: string | string[]) {
-  const ids = id instanceof Array ? id : [id]
+  const ids = id instanceof Array ? uniqueArray(id) : [id]
   ControllerManager.forEach((item, id) => {
     if (!ids.includes(id)) {
       item.disable()
@@ -212,6 +227,41 @@ export function switchGamepadController(id: string | string[]) {
       item.active()
     }
   })
+}
+
+let recordTimeout: any = null
+
+/** Push the active id onto the stack */
+function recordActiveIdStack() {
+  if (recordTimeout) {
+    return
+  }
+  recordTimeout = setTimeout(() => {
+    const ids = getActiveControllers()
+      .map((item) => item.id)
+      .join(',')
+    ids && idStack.push(ids)
+    clearTimeout(recordTimeout)
+    recordTimeout = null
+  })
+}
+
+/**
+ * Backtracking controller
+ * @param offset 
+ */
+export function recallController(offset: number) {
+  if (offset <= 0) {
+    return
+  }
+  const [recallId] = idStack.splice(
+    -clamp(Math.abs(offset) + 1, 0, idStack.length)
+  )
+  switchGamepadController(recallId.split(',').filter((id) => id))
+}
+/** clear recall stack */
+export function clearRecallStack() {
+  idStack.length = 0
 }
 
 /**

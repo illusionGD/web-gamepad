@@ -1,4 +1,5 @@
 import { InitAxesConfigType } from './types'
+import { clamp } from './utils'
 
 /** xbox key map */
 export const XBOX_KEY_MAP = {
@@ -6,10 +7,10 @@ export const XBOX_KEY_MAP = {
   B: 1,
   X: 2,
   Y: 3,
-  LT: 4,
-  RT: 5,
-  LB: 6,
-  RB: 7,
+  LB: 4,
+  RB: 5,
+  LT: 6,
+  RT: 7,
   view: 8,
   menu: 9,
   LS: 10,
@@ -64,8 +65,4 @@ export function setAxesConfig({ left, right, accuracy }: InitAxesConfigType) {
   if (accuracy !== undefined && typeof accuracy === 'number') {
     OFFSET_MIN = clamp(accuracy, 0, 1)
   }
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
 }

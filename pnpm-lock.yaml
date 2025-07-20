@@ -95,8 +95,8 @@ importers:
         specifier: ^3.5.17
         version: 3.5.17(typescript@5.8.3)
       web-gamepad:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: workspace:^
+        version: link:../core
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.2.4
@@ -2269,9 +2269,6 @@ packages:
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
-
-  web-gamepad@1.0.1:
-    resolution: {integrity: sha512-0A0Pk0vg/bqIG6QK6aGiNiuOUJk0vWFm6fc/wo12WbM8PHZ8Yu7dvTVrQ4/xkZS+XFxT0o0aVCl8kmWosrdDAA==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -4538,10 +4535,6 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
-
-  web-gamepad@1.0.1:
-    dependencies:
-      uuid: 11.1.0
 
   webidl-conversions@3.0.1: {}
 
