@@ -235,7 +235,37 @@ switchGamepadController(drawerController.id)
 // 切换多个
 // switchGamepadController([drawerController.id,popController.id]) 
 ```
+## recallController
+回溯controller
 
+```ts
+import {
+  createGamepadController,
+  XBOX_KEY_MAP,
+  INPUT_TYPE,
+  recallController,
+  switchGamepadController
+} from 'web-gamepad'
+const dialogVisible = ref(false)
+const controller = createGamepadController('btn1')
+const popController = createGamepadController('pop', false)
+controller.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, open)
+// 对话框确认
+popController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, () => {
+  dialogVisible.value = false
+  handleClose()
+})
+
+function open() {
+  dialogVisible.value = true
+  switchGamepadController(popController.id)
+}
+
+// 当关闭弹窗是，回退前1位激活的controllers
+function handleClose() {
+  recallController(1)
+}
+```
 ## getActiveControllers
 
 获取激活的控制器，返回控制器列表
