@@ -59,8 +59,7 @@ import {
   createGamepadController,
   XBOX_KEY_MAP,
   INPUT_TYPE,
-  switchGamepadController,
-  getGamepadControllerById
+  switchGamepadController
 } from 'web-gamepad'
 const dialogVisible = ref(false)
 const drawer = ref(false)
