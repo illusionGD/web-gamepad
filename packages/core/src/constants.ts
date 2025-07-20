@@ -10,8 +10,8 @@ export const XBOX_KEY_MAP = {
   RT: 5,
   LB: 6,
   RB: 7,
-  'select/back': 8,
-  'select/forward': 9,
+  view: 8,
+  menu: 9,
   LS: 10,
   RS: 11,
   up: 12,
@@ -23,29 +23,26 @@ export const XBOX_KEY_MAP = {
 
 /** ps5 key map */
 export const PS5_BUTTON_MAP = {
-  Cross: 0,
-  Circle: 1,
-  Square: 2,
-  Triangle: 3,
+  cross: 0,
+  circle: 1,
+  square: 2,
+  triangle: 3,
   L1: 4,
   R1: 5,
   L2: 6,
   R2: 7,
-  Share: 8,
-  Options: 9,
+  share: 8,
+  options: 9,
   L3: 10,
   R3: 11,
   PS: 12,
-  Touchpad: 13,
-  Microphone: 14,
-  DpadUp: 15,
-  DpadDown: 16,
-  DpadLeft: 17,
-  DpadRight: 18
+  touchpad: 13,
+  microphone: 14,
+  up: 15,
+  down: 16,
+  left: 17,
+  right: 18
 } as const
-
-/** gamepad */
-export const GAMEPAD_BTN_KEY_MAP = XBOX_KEY_MAP
 
 /** axes btn key map */
 export const AXES_BTN_KEY_MAP = {
@@ -55,11 +52,7 @@ export const AXES_BTN_KEY_MAP = {
 
 export let OFFSET_MIN = 0.1
 
-export function setAxesConfig({
-  left,
-  right,
-  accuracy
-}: InitAxesConfigType) {
+export function setAxesConfig({ left, right, accuracy }: InitAxesConfigType) {
   if (left !== undefined && typeof left === 'number') {
     AXES_BTN_KEY_MAP.LS = left
   }

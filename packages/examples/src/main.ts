@@ -6,9 +6,14 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import { initGamepad } from 'web-gamepad'
 initGamepad({
-    axes: {
-        accuracy: 0.001
-    }
+  /** 手柄链接时回调 */
+  onConnected: (gamepad: Gamepad) => {},
+  /** 手柄断开链接时回调 */
+  onDisconnected: (gamepad: Gamepad) => {},
+  axes: {
+    /** 监听手柄摇杆变化精度 */
+    accuracy: 0.001
+  }
 })
 const app = createApp(App).use(ElementPlus)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

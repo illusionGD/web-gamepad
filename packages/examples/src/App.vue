@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-button type="primary" @click="open">A</el-button>
-    <el-button type="primary" @click="open"
+    <el-button type="primary" @click="drawer = true"
       ><el-icon> <Expand /> </el-icon
     ></el-button>
     <el-dialog
@@ -59,7 +59,8 @@ import {
   createGamepadController,
   XBOX_KEY_MAP,
   INPUT_TYPE,
-  switchGamepadController
+  switchGamepadController,
+  getGamepadControllerById
 } from 'web-gamepad'
 const dialogVisible = ref(false)
 const drawer = ref(false)
@@ -73,15 +74,11 @@ addEvents()
 function addEvents() {
   // 打开对话框
   controller.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, open)
-  controller.addBtnEvents(
-    XBOX_KEY_MAP['select/forward'],
-    INPUT_TYPE.down,
-    () => {
-      drawer.value = true
-      // 先切换drawerController
-      switchGamepadController(drawerController.id)
-    }
-  )
+  controller.addBtnEvents(XBOX_KEY_MAP.menu, INPUT_TYPE.down, () => {
+    drawer.value = true
+    // 先切换drawerController
+    switchGamepadController(drawerController.id)
+  })
 
   // 对话框确认
   popController.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, () => {

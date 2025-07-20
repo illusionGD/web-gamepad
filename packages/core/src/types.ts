@@ -14,3 +14,10 @@ export type InitAxesConfigType = {
   /** axes accuracy: 0-1 */
   accuracy?: number
 } & {}
+
+export type InitConfigType =  {
+    onConnected?: (gamepad: Gamepad) => void
+    onDisconnected?: (gamepad: Gamepad) => void
+    /** axes config */
+    axes?: InitAxesConfigType
+} & {}

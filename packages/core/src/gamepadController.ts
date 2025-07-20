@@ -1,6 +1,6 @@
 import { AXES_BTN_KEY_MAP } from './constants'
 import { v4 as uuidv4 } from 'uuid'
-import { AxesFnType,  GamepadControllerType, GamepadEventMapType } from './types'
+import { AxesFnType, GamepadControllerType, GamepadEventMapType } from './types'
 
 /**
  * input type: down | up | axes
@@ -31,6 +31,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
 
   const ctrl = {
     id,
+    
     key: ctrlKey,
 
     /**
@@ -52,9 +53,9 @@ export function createGamepadController(key: string, isActive: boolean = true) {
           (key === AXES_BTN_KEY_MAP.LS || key === AXES_BTN_KEY_MAP.RS) &&
           inputType === INPUT_TYPE.axes
         ) {
-          (bucket as Set<AxesFnType>).add(fn as AxesFnType)
+          ;(bucket as Set<AxesFnType>).add(fn as AxesFnType)
         } else {
-          (bucket as Set<Function>).add(fn as Function)
+          ;(bucket as Set<Function>).add(fn as Function)
         }
         return true
       }
@@ -88,28 +89,25 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * @param inputType input type: down | up | axes
      * @param fn
      */
-    removeBtnEvents: (
-      key: number,
-      inputType: InputEventType,
-      fn: Function
-    ) => {
+    removeBtnEvents: (key: number, inputType: InputEventType, fn: Function) => {
       const bucket = getBucketByInputType(key, inputType, btnEventsMap)
 
       bucket && bucket.delete(fn)
     },
 
     /**
-     * Disable button event
+     * Whether prohibited buttons event
      * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
+     * @param isBand Whether prohibited
      */
-    bandBtnEvents: (key: number | number[]) => {
+    setBtnEventBandStatus: (key: number | number[], isBand: boolean = true) => {
       const keys = key instanceof Array ? key : [key]
       keys.forEach((item) => {
         const eventSet = btnEventsMap.get(item)
         if (!eventSet) {
           return
         }
-        eventSet.isBand = true
+        eventSet.isBand = isBand
       })
     },
 
@@ -127,11 +125,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * @param inputType input type: down | up | axes
      * @param params
      */
-    emitsBtnEvents: (
-      key: number,
-      inputType: InputEventType,
-      params?: any
-    ) => {
+    emitsBtnEvents: (key: number, inputType: InputEventType, params?: any) => {
       const bucket = getBucketByInputType(key, inputType, btnEventsMap)
       bucket && bucket.forEach((fn) => fn(params))
     },
@@ -140,8 +134,20 @@ export function createGamepadController(key: string, isActive: boolean = true) {
      * check activated
      */
     isActive: () => active,
+
+    /**
+     * disable current controller
+     */
     disable: () => (active = false),
+
+    /**
+     * activate current controller
+     */
     active: () => (active = true),
+
+    /**
+     * destroy current controller
+     */
     destroy: () => {
       return removeGamepadController(id)
     }
@@ -223,6 +229,24 @@ export function addGamepadController(
   }
   ControllerManager.set(controller.id, controller)
   return controller
+}
+
+/**
+ * get controller by id
+ * @param id
+ */
+export function getGamepadControllerById(id: string) {
+  ControllerManager.get(id)
+}
+
+/**
+ * get controllers by key
+ * @param key
+ */
+export function getGamepadControllersByKey(key: string) {
+  return Array.from(ControllerManager.values()).filter(
+    (item) => item.key === key
+  )
 }
 
 /**

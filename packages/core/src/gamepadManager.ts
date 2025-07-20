@@ -1,27 +1,28 @@
 import { AXES_BTN_KEY_MAP, OFFSET_MIN, setAxesConfig } from './constants'
 import { getActiveControllers, INPUT_TYPE } from './gamepadController'
-import { InitAxesConfigType } from './types'
+import { InitAxesConfigType, InitConfigType } from './types'
 
 const GamepadManager: {
   [key: number]: Gamepad
 } = {}
+const initConfig: InitConfigType = {}
 
 let frameId = 0
-let currentGamepad: Gamepad | null
 let isStop = false
 let isInit = false
 
 /** initialize gamepad */
-export function initGamepad(config?: {
-    /** axes config */
-    axes?: InitAxesConfigType
-}) {
+export function initGamepad(config?: InitConfigType) {
   if (isInit) {
-    return
+    return false
   }
-  if (config && config.axes) {
-    setAxesConfig(config.axes)
+
+  config && Object.assign(initConfig, config)
+
+  if (initConfig.axes) {
+    setAxesConfig(initConfig.axes)
   }
+
   // Verify whether gamepad is supported
   if (!isGamepadSupported()) {
     throw new Error('not support gamepad')
@@ -29,6 +30,7 @@ export function initGamepad(config?: {
 
   initEventListening()
   isInit = true
+  return true
 }
 
 /**
@@ -39,11 +41,11 @@ function initEventListening() {
     'gamepadconnected',
     function ({ gamepad }: GamepadEvent) {
       addGamepad(gamepad)
-      currentGamepad = gamepad
 
-      if (frameId) {
-        cancelIdleCallback(frameId)
-      }
+      initConfig.onConnected && initConfig.onConnected(gamepad)
+
+      frameId && cancelIdleCallback(frameId)
+
       gamepadLoop()
     }
   )
@@ -52,9 +54,11 @@ function initEventListening() {
     'gamepaddisconnected',
     ({ gamepad }: GamepadEvent) => {
       removeGamepad(gamepad)
+      
+      initConfig.onDisconnected && initConfig.onDisconnected(gamepad)
 
       if (!Object.keys(GamepadManager).length) {
-        destroyGamepad()
+        destroyAllGamepad()
       }
     }
   )
@@ -72,7 +76,7 @@ export function startListening() {
 }
 
 /** destroy listen */
-export function destroyGamepad() {
+function destroyAllGamepad() {
   cancelIdleCallback(frameId)
   stopListening()
   Object.keys(GamepadManager).forEach(
@@ -95,9 +99,6 @@ export function addGamepad(gamepad: Gamepad) {
 export function removeGamepad(gamepad: Gamepad | number) {
   const index = typeof gamepad === 'number' ? gamepad : gamepad.index
   delete GamepadManager[index]
-  if (currentGamepad && currentGamepad.index === index) {
-    currentGamepad = null
-  }
 }
 
 /**
@@ -149,7 +150,10 @@ function gamepadLoop() {
         const [newLsX, newLsY, newRsX, newRsY] = newGamepad.axes
         const [lsX, lsY, rsX, rsY] = gamepad.axes
         // left Joystick
-        if (Math.abs(newLsX - lsX) > OFFSET_MIN || Math.abs(newLsY - lsY) > OFFSET_MIN) {
+        if (
+          Math.abs(newLsX - lsX) > OFFSET_MIN ||
+          Math.abs(newLsY - lsY) > OFFSET_MIN
+        ) {
           controllers.forEach((ctrl) => {
             if (!ctrl.checkBtnEventsExits(AXES_BTN_KEY_MAP.LS)) {
               return
@@ -161,7 +165,10 @@ function gamepadLoop() {
           })
         }
         // right Joystick
-        if (Math.abs(newRsX - rsX) > OFFSET_MIN || Math.abs(newRsY - rsY) > OFFSET_MIN) {
+        if (
+          Math.abs(newRsX - rsX) > OFFSET_MIN ||
+          Math.abs(newRsY - rsY) > OFFSET_MIN
+        ) {
           controllers.forEach((ctrl) => {
             if (!ctrl.checkBtnEventsExits(AXES_BTN_KEY_MAP.RS)) {
               return
