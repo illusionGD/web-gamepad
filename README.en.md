@@ -1,4 +1,5 @@
 # web-gamepad
+
 <p align="center">
   <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">
     <img width="180" src="https://cdn-fusion.imgcdn.store/i/2025/774b32fc5b0d72b2.png" alt="Vite logo">
@@ -72,11 +73,11 @@ controller.addBtnEvents(XBOX_KEY_MAP.RS, INPUT_TYPE.axes, ([x, y]) => {
 
 # Configuration
 
-| Variable Name            | Type                         | default  | Default                                                                                                                               |
-| -------------- | -------------------------- | --- | -------------------------------------------------------------------------------------------------------------------------------- |
-| axes           | object                     |     | Optional,Joystick configuration, not required for standard gamepads, configure left and right joystick keys for special gamepads |
-| onConnected    | (gamepad: Gamepad) => void |    | Callback when gamepad is connected                                                                                               |
-| onDisconnected | (gamepad: Gamepad) => void |    | Callback when gamepad is disconnected                                                                                            |
+| Variable Name  | Type                       | default | Default                                                                                                                          |
+| -------------- | -------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| axes           | object                     |         | Optional,Joystick configuration, not required for standard gamepads, configure left and right joystick keys for special gamepads |
+| onConnected    | (gamepad: Gamepad) => void |         | Callback when gamepad is connected                                                                                               |
+| onDisconnected | (gamepad: Gamepad) => void |         | Callback when gamepad is disconnected                                                                                            |
 
 # Variables
 
@@ -140,19 +141,21 @@ const PS5_BUTTON_MAP = {
 
 Controller type
 
-| Name                    | Type       | Description                                   |
-| --------------------- | -------- | ------------------------------------ |
-| id                    | string   | uuid                                 |
-| key                   | string   | Custom key                           |
-| addBtnEvents          | function | Add button events                    |
-| removeBtnEvents       | function | Remove button events                 |
-| setBtnEventBandStatus | function | Set button event disable status      |
-| checkBtnEventsExits   | function | Check if button event binding exists |
-| emitsBtnEvents        | function | Trigger bound button events          |
-| isActive              | function | Whether the controller is active     |
-| active                | function | Activate the controller              |
-| disable               | function | Deactivate the controller            |
-| destroy               | function | Destroy the controller               |
+| Name                  | Type     |                                                                      | Description                                                                                                                                                                              |
+| --------------------- | -------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                    | string   |                                                                      | uuid                                                                                                                                                                                     |
+| key                   | string   |                                                                      | Custom key                                                                                                                                                                               |
+| addBtnEvents          | function | (key: number, inputType: InputEventType, fn: Function \| AxesFnType) | Add button events                                                                                                                                                                        |
+| removeBtnEvents       | function | (key: number, inputType: InputEventType, fn: Function)               | Remove button events                                                                                                                                                                     |
+| setBtnEventBandStatus | function | (key: number \| number[], isBand: boolean = true)                    | Set button event disable status                                                                                                                                                          |
+| checkBtnEventActive   | function | (key: number)                                                        | Check if the button event is disabled, returns boolean                                                                                                                                   |
+| checkBtnEventsExits   | function | (key: number)                                                        | Check if button event binding exists                                                                                                                                                     |
+| emitsBtnEvents        | function | (key: number, inputType: InputEventType, params?: any)               | Trigger bound button events                                                                                                                                                              |
+| getAllBtnEventBucket  | function |                                                                      | Get all button binding events under this controller, returns: `{ key:number,isBand: boolean; onDownBucket: Set<Function>; onUpBucket: Set<Function>; onAxesBucket: Set<AxesFnType>; }[]` |
+| isActive              | function |                                                                      | Whether the controller is active                                                                                                                                                         |
+| active                | function |                                                                      | Activate the controller                                                                                                                                                                  |
+| disable               | function |                                                                      | Deactivate the controller                                                                                                                                                                |
+| destroy               | function |                                                                      | Destroy the controller                                                                                                                                                                   |
 
 ## InputEventType
 
@@ -231,8 +234,11 @@ switchGamepadController(drawerController.id)
 // Switch multiple
 // switchGamepadController([drawerController.id,popController.id]) 
 ```
+
 ## recallController
+
 recall controller
+
 ```ts
 import {
   createGamepadController,
@@ -266,42 +272,134 @@ function handleClose() {
 
 Get active controllers, return controller list
 
+```ts
+import {
+  createGamepadController,
+getActiveControllers
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const popController = createGamepadController('pop')
+const drawerController = createGamepadController('drawer', false)
+
+getActiveControllers() // [controller,popController ]
+```
+
 ## getGamepadControllerById
 
 Get controller by id
+
+```ts
+import {
+  createGamepadController,
+getGamepadControllerById
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+
+getGamepadControllerById(controller.id) // controller
+```
 
 ## getGamepadControllersByKey
 
 Get controllers by key, return controller list
 
+```ts
+import {
+  createGamepadController,
+getGamepadControllersByKey
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl')
+getGamepadControllersByKey('ctrl') // [controller,controller2]
+```
+
 ## removeGamepadController
 
 Remove controller
+
+```ts
+import {
+  createGamepadController,
+removeGamepadController
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl')
+removeGamepadController(controller.id)
+getGamepadControllersByKey('ctrl') // [controller2]
+```
+
+
 
 ## addGamepadController
 
 Add controller
 
+```ts
+import {
+  createGamepadController,
+removeGamepadController,
+addGamepadController
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl')
+removeGamepadController(controller.id)
+getGamepadControllersByKey('ctrl') // [controller2]
+addGamepadController(controller)
+getGamepadControllersByKey('ctrl') // [controller, controller2]
+```
+
 ## addGamepad
 
 Add gamepad
+
+```ts
+import {
+addGamepad,
+getGamepadList
+} from 'web-gamepad'
+initGamepad()
+addGamepad(gamepad)
+getGamepadList() // [gamepad]
+```
 
 ## removeGamepad
 
 Remove gamepad
 
+```ts
+import {
+removeGamepad,
+getGamepadList
+} from 'web-gamepad'
+initGamepad()
+getGamepadList().forEach(gamepad => removeGamepad(gamepad))
+getGamepadList() // []
+```
+
 ## isGamepadSupported
 
-Whether gamepad is supported
+Whether gamepad is supported, returns `boolean`
 
 ## getGamepadList
 
 Get gamepad list
 
+```ts
+import {
+getGamepadList
+} from 'web-gamepad'
+initGamepad()
+getGamepadList() // [gamepad,...]
+```
+
 ## stopListening
 
-Stop gamepad input monitoring
+Stop listening to gamepad input, all gamepad input events will not be triggered
 
 ## startListening
 
-Start gamepad input monitoring
+Start listening to gamepad input, all gamepad input events will be triggered again

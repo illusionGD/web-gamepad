@@ -1,4 +1,5 @@
 # web-gamepad
+
 <p align="center">
   <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">
     <img width="180" src="https://cdn-fusion.imgcdn.store/i/2025/774b32fc5b0d72b2.png" alt="Vite logo">
@@ -144,19 +145,21 @@ const PS5_BUTTON_MAP = {
 
 控制器类型
 
-| 名称                    | 类型       | 说明            |
-| --------------------- | -------- | ------------- |
-| id                    | string   | uuid          |
-| key                   | string   | 自定义key        |
-| addBtnEvents          | function | 添加按钮事件        |
-| removeBtnEvents       | function | 移除按钮事件        |
-| setBtnEventBandStatus | function | 设置按钮事件禁用状态    |
-| checkBtnEventsExits   | function | 检查是否存在按钮事件的绑定 |
-| emitsBtnEvents        | function | 触发绑定的按钮事件     |
-| isActive              | function | 控制器是否激活       |
-| active                | function | 激活控制器         |
-| disable               | function | 不激活控制器        |
-| destroy               | function | 销毁控制器         |
+| 名称                    | 类型       | 参数                                                                                           | 说明                                                                                                                                                           |
+| --------------------- | -------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id                    | string   |                                                                                              | uuid                                                                                                                                                         |
+| key                   | string   |                                                                                              | 自定义key                                                                                                                                                       |
+| addBtnEvents          | function | (      key: number,      inputType: InputEventType,      fn: Function \| AxesFnType    ) | 添加按钮事件                                                                                                                                                       |
+| removeBtnEvents       | function | (key: number, inputType: InputEventType, fn: Function)                                       | 移除按钮事件                                                                                                                                                       |
+| setBtnEventBandStatus | function | (key: number \| number[], isBand: boolean = true)                                            | 设置按钮事件禁用状态，禁用后，不会触发该按钮事件                                                                                                                                     |
+| checkBtnEventActive   | function | (key: number)                                                                                | 检查按钮事件是否处于禁用状态，返回```boolean```                                                                                                                               |
+| checkBtnEventsExits   | function | (key: number)                                                                                | 检查是否存在按钮事件的绑定，返回```boolean```                                                                                                                                |
+| emitsBtnEvents        | function | (key: number, inputType: InputEventType, params?: any)                                       | 触发绑定的按钮事件                                                                                                                                                    |
+| getAllBtnEventBucket  | function |                                                                                              | 获取该控制器下全部按钮绑定事件，返回：```{ key:number,isBand: boolean;     onDownBucket: Set<Function>;    onUpBucket: Set<Function>;     onAxesBucket: Set<AxesFnType>; }[]``` |
+| isActive              | function |                                                                                              | 控制器是否激活，返回```boolean```                                                                                                                                      |
+| active                | function |                                                                                              | 激活控制器                                                                                                                                                        |
+| disable               | function |                                                                                              | 不激活控制器                                                                                                                                                       |
+| destroy               | function |                                                                                              | 销毁控制器                                                                                                                                                        |
 
 ## InputEventType
 
@@ -222,7 +225,8 @@ controller.addBtnEvents(XBOX_KEY_MAP.A, INPUT_TYPE.down, () => {})
 import {
   createGamepadController,
   XBOX_KEY_MAP,
-  INPUT_TYPE
+  INPUT_TYPE,
+switchGamepadController
 } from 'web-gamepad'
 
 const controller = createGamepadController('btn1')
@@ -235,7 +239,9 @@ switchGamepadController(drawerController.id)
 // 切换多个
 // switchGamepadController([drawerController.id,popController.id]) 
 ```
+
 ## recallController
+
 回溯controller
 
 ```ts
@@ -266,46 +272,137 @@ function handleClose() {
   recallController(1)
 }
 ```
+
 ## getActiveControllers
 
 获取激活的控制器，返回控制器列表
+
+```ts
+import {
+  createGamepadController,
+getActiveControllers
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const popController = createGamepadController('pop')
+const drawerController = createGamepadController('drawer', false)
+
+getActiveControllers() // [controller,popController ]
+```
 
 ## getGamepadControllerById
 
 通过id获取控制器
 
+```ts
+import {
+  createGamepadController,
+getGamepadControllerById
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+
+getGamepadControllerById(controller.id) // controller
+```
+
 ## getGamepadControllersByKey
 
 通过key获取控制器，返回控制器列表
+
+```ts
+import {
+  createGamepadController,
+getGamepadControllersByKey
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl')
+getGamepadControllersByKey('ctrl') // [controller,controller2]
+```
 
 ## removeGamepadController
 
 移除控制器
 
+```ts
+import {
+  createGamepadController,
+removeGamepadController
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl')
+removeGamepadController(controller.id)
+getGamepadControllersByKey('ctrl') // [controller2]
+```
+
 ## addGamepadController
 
 添加控制器
+
+```ts
+import {
+  createGamepadController,
+removeGamepadController,
+addGamepadController
+} from 'web-gamepad'
+
+const controller = createGamepadController('ctrl')
+const controller2 = createGamepadController('ctrl')
+removeGamepadController(controller.id)
+getGamepadControllersByKey('ctrl') // [controller2]
+addGamepadController(controller)
+getGamepadControllersByKey('ctrl') // [controller, controller2]
+```
 
 ## addGamepad
 
 添加手柄
 
+```ts
+import {
+addGamepad,
+getGamepadList
+} from 'web-gamepad'
+initGamepad()
+addGamepad(gamepad)
+getGamepadList() // [gamepad]
+```
+
 ## removeGamepad
 
 移除手柄
 
+```ts
+import {
+removeGamepad,
+getGamepadList
+} from 'web-gamepad'
+initGamepad()
+getGamepadList().forEach(gamepad => removeGamepad(gamepad))
+getGamepadList() // []
+```
+
 ## isGamepadSupported
 
-是否支持手柄
+是否支持手柄，返回```boolean```
 
 ## getGamepadList
 
 获取手柄列表
 
+```ts
+import {
+getGamepadList
+} from 'web-gamepad'
+initGamepad()
+getGamepadList() // [gamepad,...]
+```
+
 ## stopListening
 
-停止手柄输入监听
+停止手柄输入监听，全部手柄输入事件将不会触发
 
 ## startListening
 
-开启手柄输入监听
+开启手柄输入监听，全部手柄输入事件将重新触发

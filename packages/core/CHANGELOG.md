@@ -1,5 +1,11 @@
 # web-gamepad
 
+## 1.0.4
+
+### Patch Changes
+
+- little update
+
 ## 1.0.3
 
 ### Patch Changes

@@ -139,7 +139,7 @@ function open() {
   dialogVisible.value = true
   switchGamepadController(popController.id)
 }
-
+// 当关闭弹窗是，回退前1位激活的controllers
 function handleClose() {
   recallController(1)
 }

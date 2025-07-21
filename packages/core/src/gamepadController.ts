@@ -32,7 +32,7 @@ export function createGamepadController(key: string, isActive: boolean = true) {
   // Button event bucket
   const btnEventsMap = new Map<number, GamepadEventMapType>()
   const ctrlKey = key
-  const id: string = `${idLen}-${key}`
+  const id: string = `${idLen}`
   let active = isActive
 
   idLen += 1
@@ -117,6 +117,29 @@ export function createGamepadController(key: string, isActive: boolean = true) {
         }
         eventSet.isBand = isBand
       })
+    },
+
+    /**
+     * get all button event bucket
+     */
+    getAllBtnEventBucket: () => {
+      const items: Array<{ key: number } & GamepadEventMapType> = []
+      btnEventsMap.forEach((item, key) => {
+        items.push({
+          key: Number(key),
+          ...item
+        })
+      })
+      return items
+    },
+
+    /**
+     * Verify whether the button event active
+     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
+     */
+    checkBtnEventActive(key: number) {
+      const { isBand } = btnEventsMap.get(key) || {}
+      return !!isBand
     },
 
     /**
@@ -248,7 +271,7 @@ function recordActiveIdStack() {
 
 /**
  * Backtracking controller
- * @param offset 
+ * @param offset
  */
 export function recallController(offset: number) {
   if (offset <= 0) {
@@ -259,6 +282,7 @@ export function recallController(offset: number) {
   )
   switchGamepadController(recallId.split(',').filter((id) => id))
 }
+
 /** clear recall stack */
 export function clearRecallStack() {
   idStack.length = 0
