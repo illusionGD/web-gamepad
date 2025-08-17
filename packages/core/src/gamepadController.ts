@@ -4,7 +4,8 @@ import { AxesFnType, GamepadControllerType, GamepadEventMapType } from './types'
 import { clamp, uniqueArray } from './utils'
 
 /**
- * input type: down | up | axes
+ * @en Input type: down | up | axes
+ * @zh 输入类型：down | up | axes
  */
 export const INPUT_TYPE = {
   down: 'down',
@@ -14,39 +15,77 @@ export const INPUT_TYPE = {
 
 export type InputEventType = keyof typeof INPUT_TYPE
 
-/** controller id stack */
+/**
+ * @en Controller id stack
+ * @zh 控制器ID栈
+ */
 const idStack: string[] = []
 
-/** controller manager */
+/**
+ * @en Controller manager
+ * @zh 控制器管理器
+ */
 const ControllerManager = new Map<string, GamepadControllerType>()
 
 let idLen = 0
 
 /**
- * Create a handle controller
- * @param key controller key
- * @param isActive is active
- * @returns
+ * @en Create a handle controller
+ * @zh 创建一个手柄控制器
+ * @param key - @en Controller key @zh 控制器标识
+ * @param isActive - @en Is active @zh 是否激活
+ * @param gamepadIndex - @en Gamepad unique index, The controller is controlled by this gamepad, It can be obtained when listening to the controller connection (`onConnected`) @zh 游戏手柄唯一索引，该控制器由此游戏手柄控制，可在监听手柄连接（`onConnected`）时获取
  */
-export function createGamepadController(key: string, isActive: boolean = true) {
-  // Button event bucket
+export function createGamepadController(
+  key: string,
+  isActive: boolean = true,
+  gamepadIndex?: number
+) {
+  // @en Button event bucket
+  // @zh 按钮事件桶
   const btnEventsMap = new Map<number, GamepadEventMapType>()
   const ctrlKey = key
   const id: string = `${idLen}`
   let active = isActive
+  let parentIndex = gamepadIndex
 
   idLen += 1
 
   const ctrl = {
+    /**
+     * @en Controller unique id
+     * @zh 控制器唯一ID
+     */
     id,
 
+    /**
+     * @en Customer controller key
+     * @zh 用户自定义控制器标识
+     */
     key: ctrlKey,
 
     /**
-     * Add button event
-     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
-     * @param inputType input type: down | up | axes
-     * @param fn
+     * @en get gamepad unique index
+     * @zh 获取该控制器的手柄唯一index
+     */
+    getControllerGamepadIndex() {
+      return parentIndex
+    },
+
+    /**
+     * @en set gamepad unique index
+     * @zh 设置该控制器的手柄唯一index
+     */
+    setGamepadIndex(index: number) {
+      parentIndex = index
+    },
+
+    /**
+     * @en Add button event
+     * @zh 添加按钮事件
+     * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
+     * @param inputType - @en Input type: down | up | axes @zh 输入类型：down | up | axes
+     * @param fn - @en Event handler @zh 事件处理函数
      */
     addBtnEvents: (
       key: number,
@@ -56,7 +95,8 @@ export function createGamepadController(key: string, isActive: boolean = true) {
       const bucket = getBucketByInputType(key, inputType, btnEventsMap)
 
       if (bucket) {
-        // axes bucket requires AxesFnType
+        // @en Axes bucket requires AxesFnType
+        // @zh 轴事件桶需要 AxesFnType
         if (
           (key === AXES_BTN_KEY_MAP.LS || key === AXES_BTN_KEY_MAP.RS) &&
           inputType === INPUT_TYPE.axes
@@ -75,13 +115,15 @@ export function createGamepadController(key: string, isActive: boolean = true) {
         onAxesBucket: new Set<AxesFnType>()
       }
 
-      // button
+      // @en Button
+      // @zh 按钮
       if (inputType !== INPUT_TYPE.axes) {
         inputType === INPUT_TYPE.down
           ? newBucket.onDownBucket.add(fn as Function)
           : newBucket.onUpBucket.add(fn as Function)
       } else {
-        // axes
+        // @en Axes
+        // @zh 轴
         if (key === AXES_BTN_KEY_MAP.LS || key === AXES_BTN_KEY_MAP.RS) {
           newBucket.onAxesBucket.add(fn as AxesFnType)
         }
@@ -92,10 +134,11 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * Remove button event
-     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
-     * @param inputType input type: down | up | axes
-     * @param fn
+     * @en Remove button event
+     * @zh 移除按钮事件
+     * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
+     * @param inputType - @en Input type: down | up | axes @zh 输入类型：down | up | axes
+     * @param fn - @en Event handler @zh 事件处理函数
      */
     removeBtnEvents: (key: number, inputType: InputEventType, fn: Function) => {
       const bucket = getBucketByInputType(key, inputType, btnEventsMap)
@@ -104,9 +147,10 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * Whether prohibited buttons event
-     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
-     * @param isBand Whether prohibited
+     * @en Whether to prohibit button events
+     * @zh 是否禁止按钮事件
+     * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
+     * @param isBand - @en Whether prohibited @zh 是否禁止
      */
     setBtnEventBandStatus: (key: number | number[], isBand: boolean = true) => {
       const keys = key instanceof Array ? key : [key]
@@ -120,7 +164,8 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * get all button event bucket
+     * @en Get all button event buckets
+     * @zh 获取所有按钮事件桶
      */
     getAllBtnEventBucket: () => {
       const items: Array<{ key: number } & GamepadEventMapType> = []
@@ -134,8 +179,9 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * Verify whether the button event active
-     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
+     * @en Verify whether the button event is active
+     * @zh 校验按钮事件是否激活
+     * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
      */
     checkBtnEventActive(key: number) {
       const { isBand } = btnEventsMap.get(key) || {}
@@ -143,18 +189,20 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * Verify whether the button event exists
-     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
+     * @en Verify whether the button event exists
+     * @zh 校验按钮事件是否存在
+     * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
      */
     checkBtnEventsExits(key: number) {
       return btnEventsMap.has(key)
     },
 
     /**
-     * Trigger the corresponding button event
-     * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
-     * @param inputType input type: down | up | axes
-     * @param params
+     * @en Trigger the corresponding button event
+     * @zh 触发对应的按钮事件
+     * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
+     * @param inputType - @en Input type: down | up | axes @zh 输入类型：down | up | axes
+     * @param params - @en Event parameters @zh 事件参数
      */
     emitsBtnEvents: (key: number, inputType: InputEventType, params?: any) => {
       const bucket = getBucketByInputType(key, inputType, btnEventsMap)
@@ -162,12 +210,14 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * check activated
+     * @en Check if activated
+     * @zh 检查是否激活
      */
     isActive: () => active,
 
     /**
-     * disable current controller
+     * @en Disable current controller
+     * @zh 禁用当前控制器
      */
     disable: () => {
       recordActiveIdStack()
@@ -175,7 +225,8 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * activate current controller
+     * @en Activate current controller
+     * @zh 激活当前控制器
      */
     active: () => {
       recordActiveIdStack()
@@ -183,7 +234,8 @@ export function createGamepadController(key: string, isActive: boolean = true) {
     },
 
     /**
-     * destroy current controller
+     * @en Destroy current controller
+     * @zh 销毁当前控制器
      */
     destroy: () => {
       return removeGamepadController(id)
@@ -200,9 +252,11 @@ export function createGamepadController(key: string, isActive: boolean = true) {
 }
 
 /**
- * @param key gamepad key, doc: https://w3c.github.io/gamepad/#remapping
- * @param inputType input type: down | up | axes
- * @param btnEventsMap
+ * @en Get event bucket by input type
+ * @zh 根据输入类型获取事件桶
+ * @param key - @en Gamepad key, doc: https://w3c.github.io/gamepad/#remapping @zh 游戏手柄按键，参考：https://w3c.github.io/gamepad/#remapping
+ * @param inputType - @en Input type: down | up | axes @zh 输入类型：down | up | axes
+ * @param btnEventsMap - @en Button events map @zh 按钮事件映射
  */
 function getBucketByInputType(
   key: number,
@@ -229,7 +283,10 @@ function getBucketByInputType(
     : eventSet.onUpBucket
 }
 
-/** Get the activated controller */
+/**
+ * @en Get the activated controllers
+ * @zh 获取激活的控制器
+ */
 export function getActiveControllers() {
   const list = Array.from(ControllerManager.values()).filter((item) =>
     item.isActive()
@@ -238,8 +295,9 @@ export function getActiveControllers() {
 }
 
 /**
- * Switch controllers and support activating multiple controllers simultaneously
- * @param id
+ * @en Switch controllers and support activating multiple controllers simultaneously
+ * @zh 切换控制器，支持同时激活多个控制器
+ * @param id - @en Controller id(s) @zh 控制器ID（可为数组）
  */
 export function switchGamepadController(id: string | string[]) {
   const ids = id instanceof Array ? uniqueArray(id) : [id]
@@ -254,15 +312,24 @@ export function switchGamepadController(id: string | string[]) {
 
 let recordTimeout: any = null
 
-/** Push the active id onto the stack */
+/**
+ * @en Push the active id onto the stack
+ * @zh 将激活的ID推入栈中
+ */
 function recordActiveIdStack() {
   if (recordTimeout) {
     return
   }
   recordTimeout = setTimeout(() => {
     const ids = getActiveControllers()
-      .map((item) => item.id)
-      .join(',')
+      .map((item) => {
+        const btnEventList = item.getAllBtnEventBucket()
+        const btnStatus = btnEventList.reduce((prev, cur, index) => {
+          return `${prev}${cur.key}-${cur.isBand ? '0' : '1'}${index === btnEventList.length - 1 ? '' : ','}`
+        }, '#')
+        return `${item.id}${btnStatus}`
+      })
+      .join(';')
     ids && idStack.push(ids)
     clearTimeout(recordTimeout)
     recordTimeout = null
@@ -270,29 +337,95 @@ function recordActiveIdStack() {
 }
 
 /**
- * Backtracking controller
- * @param offset
+ * @en Backtracking controller
+ * @zh 回溯控制器
+ * @param offset - @en Offset steps @zh 回溯步数
+ * @param config - @en Config: resetBtnStatus: reset btn status, default `false` @zh 配置项：resetBtnStatus 是否重置按钮状态，默认`false`
  */
-export function recallController(offset: number) {
+export function rollbackController(
+  offset: number,
+  config?: {
+    resetBtnStatus?: boolean
+  }
+) {
   if (offset <= 0) {
     return
   }
-  const [recallId] = idStack.splice(
+  const [rollbackId] = idStack.splice(
     -clamp(Math.abs(offset) + 1, 0, idStack.length)
   )
-  switchGamepadController(recallId.split(',').filter((id) => id))
+  const list = rollbackId.split(';').filter((str) => str)
+  const idList: string[] = []
+
+  list.forEach((str) => {
+    const { id, btnStatusMap } = parseRollbackRecord(str)
+    id && idList.push(id)
+
+    // @en Set button band status
+    // @zh 设置按钮禁用状态
+    if (config && config.resetBtnStatus) {
+      const controller = getGamepadControllerById(id)
+      Object.keys(btnStatusMap).forEach((key) => {
+        const k = Number(key)
+        const status = btnStatusMap[k]
+        controller && controller.setBtnEventBandStatus(k, status)
+      })
+    }
+  })
+
+  // @en Activate controller
+  // @zh 激活控制器
+  switchGamepadController(idList)
 }
 
-/** clear recall stack */
-export function clearRecallStack() {
+/**
+ * @en Clear rollback stack
+ * @zh 清空回溯栈
+ */
+export function clearRollbackStack() {
   idStack.length = 0
 }
 
 /**
- * add controller
- * @param id
- * @param controller
- * @param isActive
+ * @en Parse rollback record
+ * @zh 解析回溯记录
+ * @param str - @en Record string @zh 记录字符串
+ */
+function parseRollbackRecord(str: string) {
+  const [id, status] = str.split('#')
+  const statusList: string[] = []
+  const btnStatusMap: { [key: number]: boolean } = {}
+  status && statusList.push(...status.split(','))
+  statusList.forEach((str) => {
+    const [key, status] = str.split('-')
+    btnStatusMap[Number(key)] = status === '0'
+  })
+
+  return {
+    id,
+    btnStatusMap
+  }
+}
+
+/**
+ * @en Get rollback stack
+ * @zh 获取回溯栈
+ * @returns [][] @en id: controllerId; btnStatusMap: btn event status, `status=true`-active `status=false`-disable @zh id: 控制器ID; btnStatusMap: 按钮事件状态，`status=true`-激活 `status=false`-禁用
+ */
+export function getRollbackStack() {
+  return idStack
+    .map((str) => {
+      const list = str.split(';')
+      return list.map((item) => parseRollbackRecord(item))
+    })
+    .reverse()
+}
+
+/**
+ * @en Add controller
+ * @zh 添加控制器
+ * @param controller - @en Controller instance @zh 控制器实例
+ * @param isActive - @en Is active @zh 是否激活
  */
 export function addGamepadController(
   controller: GamepadControllerType,
@@ -306,16 +439,26 @@ export function addGamepadController(
 }
 
 /**
- * get controller by id
- * @param id
+ * @en Get all gamepad controllers
+ * @zh 获取所有游戏手柄控制器
  */
-export function getGamepadControllerById(id: string) {
-  ControllerManager.get(id)
+export function getAllGamepadController() {
+  return Array.from(ControllerManager.values())
 }
 
 /**
- * get controllers by key
- * @param key
+ * @en Get controller by id
+ * @zh 根据ID获取控制器
+ * @param id - @en Controller id @zh 控制器ID
+ */
+export function getGamepadControllerById(id: string) {
+  return ControllerManager.get(id)
+}
+
+/**
+ * @en Get controllers by key
+ * @zh 根据标识获取控制器
+ * @param key - @en Controller key @zh 控制器标识
  */
 export function getGamepadControllersByKey(key: string) {
   return Array.from(ControllerManager.values()).filter(
@@ -324,8 +467,9 @@ export function getGamepadControllersByKey(key: string) {
 }
 
 /**
- * Remove the gamepad controller
- * @param id
+ * @en Remove the gamepad controller
+ * @zh 移除游戏手柄控制器
+ * @param id - @en Controller id @zh 控制器ID
  */
 export function removeGamepadController(id: string) {
   ControllerManager.delete(id)

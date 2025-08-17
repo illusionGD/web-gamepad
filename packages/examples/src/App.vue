@@ -60,13 +60,14 @@ import {
   XBOX_KEY_MAP,
   INPUT_TYPE,
   switchGamepadController,
-  recallController
+  rollbackController,
+  getRollbackStack
 } from 'web-gamepad'
 const dialogVisible = ref(false)
 const drawer = ref(false)
 const radio1 = ref('1')
 const textRef = ref<HTMLElement | null>()
-const controller = createGamepadController('btn1')
+const controller = createGamepadController('btn1', true)
 const controller2 = createGamepadController('btn2', false)
 const popController = createGamepadController('pop', false)
 const drawerController = createGamepadController('drawer', false)
@@ -106,11 +107,15 @@ function addEvents() {
   let dist = 0
   // 滚动
   popController.addBtnEvents(XBOX_KEY_MAP.RS, INPUT_TYPE.axes, ([x, y]) => {
+    // console.log('🚀 ~ x, y:', x, y)
     const direct = y < 0 ? -1 : 1
-    dist = Math.abs(Math.abs(y) - oldY) * direct
-    oldTop += dist * 20
+    // dist = Math.abs(Math.abs(y) - oldY) * direct
+    // oldY = y
+    // console.log('🚀 ~ oldY:', oldY)
+    // console.log("🚀 ~ dist:", dist)
+    // oldTop += dist * 20
     if (textRef.value) {
-      textRef.value.scrollTop = oldTop
+      textRef.value.scrollTop += direct * 2
     }
   })
 
@@ -128,7 +133,7 @@ function addEvents() {
 function cancelClick() {
   drawer.value = false
   // 切回第一个controller
-  recallController(1)
+  rollbackController(1)
 }
 
 function confirmClick() {
@@ -138,10 +143,13 @@ function confirmClick() {
 function open() {
   dialogVisible.value = true
   switchGamepadController(popController.id)
+  // drawerController.setBtnEventBandStatus(XBOX_KEY_MAP.LB, true)
+  // drawerController.setBtnEventBandStatus(XBOX_KEY_MAP.RB, true)
+  console.log('🚀 ~ open ~ getRollbackStack():', getRollbackStack())
 }
 // 当关闭弹窗是，回退前1位激活的controllers
 function handleClose() {
-  recallController(1)
+  rollbackController(1)
 }
 console.log('🚀 ~ controller:', controller)
 </script>

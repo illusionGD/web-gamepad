@@ -36,9 +36,11 @@ initGamepad({
   onConnected: (gamepad: Gamepad) => {},
   /** 手柄断开链接时回调 */
   onDisconnected: (gamepad: Gamepad) => {},
+  /** 手柄输入时回调 */
+  onInput: (gamepad: Gamepad) => {},
   axes: {
-    /** 监听手柄摇杆变化精度 */
-    accuracy: 0.001
+    /** 手柄摇杆死区半径，默认0.05 */
+    deadZoneRadius: 0.05
   }
 })
 
@@ -111,12 +113,12 @@ const XBOX_KEY_MAP = {
 } as const
 ```
 
-## PS5_BUTTON_MAP
+## PS_KEY_MAP
 
 ps5手柄的key值表
 
 ```ts
-const PS5_BUTTON_MAP = {
+export const PS_KEY_MAP = {
   cross: 0,
   circle: 1,
   square: 2,
@@ -129,13 +131,37 @@ const PS5_BUTTON_MAP = {
   options: 9,
   L3: 10,
   R3: 11,
-  PS: 12,
-  touchpad: 13,
-  microphone: 14,
-  up: 15,
-  down: 16,
-  left: 17,
-  right: 18
+  up: 12,
+  down: 13,
+  left: 14,
+  right: 15,
+  home: 16
+} as const
+```
+
+## SWITCH_PRO_KEY_MAP
+
+switch手柄的key值表
+
+```ts
+export const SWITCH_PRO_KEY_MAP = {
+  B: 0,
+  A: 1,
+  Y: 2,
+  X: 3,
+  L: 4,
+  R: 5,
+  ZL: 6,
+  ZR: 7,
+  minus: 8,
+  plus: 9,
+  L3: 10,
+  R3: 11,
+  up: 12,
+  down: 13,
+  left: 14,
+  right: 15,
+  home: 16
 } as const
 ```
 
@@ -145,21 +171,23 @@ const PS5_BUTTON_MAP = {
 
 控制器类型
 
-| 名称                    | 类型       | 参数                                                                                           | 说明                                                                                                                                                           |
-| --------------------- | -------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| id                    | string   |                                                                                              | uuid                                                                                                                                                         |
-| key                   | string   |                                                                                              | 自定义key                                                                                                                                                       |
-| addBtnEvents          | function | (key: number, inputType: InputEventType, fn: Function \| AxesFnType)| 添加按钮事件                                                                                                                                                       |
-| removeBtnEvents       | function | (key: number, inputType: InputEventType, fn: Function)                                       | 移除按钮事件                                                                                                                                                       |
-| setBtnEventBandStatus | function | (key: number \| number[], isBand: boolean = true)                                            | 设置按钮事件禁用状态，禁用后，不会触发该按钮事件                                                                                                                                     |
-| checkBtnEventActive   | function | (key: number)                                                                                | 检查按钮事件是否处于禁用状态，返回                                                                                                                              |
-| checkBtnEventsExits   | function | (key: number)                                                                                | 检查是否存在按钮事件的绑定，返回                                                                                                                               |
-| emitsBtnEvents        | function | (key: number, inputType: InputEventType, params?: any) | 触发绑定的按钮事件|
-| getAllBtnEventBucket  | function |                                                                                              | 获取该控制器下全部按钮绑定事件，返回：`{ key:number,isBand: boolean; onDownBucket: Set<Function>; onUpBucket: Set<Function>; onAxesBucket: Set<AxesFnType>; }[]`|
-| isActive              | function |                                                                                              | 控制器是否激活，返回                                                                                                                                     |
-| active                | function |                                                                                              | 激活控制器                                                                                                                                                        |
-| disable               | function |                                                                                              | 不激活控制器                                                                                                                                                       |
-| destroy               | function |                                                                                              | 销毁控制器                                                                                                                                                        |
+| 名称                        | 类型       | 参数                                                                   | 说明                                                                                                                                            |
+| ------------------------- | -------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | string   |                                                                      | uuid                                                                                                                                          |
+| key                       | string   |                                                                      | 自定义key                                                                                                                                        |
+| getControllerGamepadIndex | function |                                                                      | 获取该控制器的手柄唯一index                                                                                                                              |
+| setGamepadIndex           | function | (index: number)                                                      | 设置该控制器的手柄唯一index                                                                                                                              |
+| addBtnEvents              | function | (key: number, inputType: InputEventType, fn: Function \| AxesFnType) | 添加按钮事件                                                                                                                                        |
+| removeBtnEvents           | function | (key: number, inputType: InputEventType, fn: Function)               | 移除按钮事件                                                                                                                                        |
+| setBtnEventBandStatus     | function | (key: number \| number[], isBand: boolean = true)                    | 设置按钮事件禁用状态，禁用后，不会触发该按钮事件                                                                                                                      |
+| checkBtnEventActive       | function | (key: number)                                                        | 检查按钮事件是否处于禁用状态，返回                                                                                                                             |
+| checkBtnEventsExits       | function | (key: number)                                                        | 检查是否存在按钮事件的绑定，返回                                                                                                                              |
+| emitsBtnEvents            | function | (key: number, inputType: InputEventType, params?: any)               | 触发绑定的按钮事件                                                                                                                                     |
+| getAllBtnEventBucket      | function |                                                                      | 获取该控制器下全部按钮绑定事件，返回：`{ key:number,isBand: boolean; onDownBucket: Set<Function>; onUpBucket: Set<Function>; onAxesBucket: Set<AxesFnType>; }[]` |
+| isActive                  | function |                                                                      | 控制器是否激活，返回                                                                                                                                    |
+| active                    | function |                                                                      | 激活控制器                                                                                                                                         |
+| disable                   | function |                                                                      | 不激活控制器                                                                                                                                        |
+| destroy                   | function |                                                                      | 销毁控制器                                                                                                                                         |
 
 ## InputEventType
 
@@ -185,9 +213,11 @@ initGamepad({
   onConnected: (gamepad: Gamepad) => {},
   /** 手柄断开链接时回调 */
   onDisconnected: (gamepad: Gamepad) => {},
+ /** 手柄输入时回调 */
+  onInput: (gamepad: Gamepad) => {},
   axes: {
-    /** 监听手柄摇杆变化精度 */
-    accuracy: 0.001
+    /** 手柄死区半径半径 */
+    deadZoneRadius: 0.05
   }
 })
 ```
@@ -201,6 +231,8 @@ initGamepad({
 - key: string，自定义手柄的key值
 
 - isActive：Boolean，可选，默认true，是否激活该控制器
+
+- index: 游戏手柄唯一索引，该控制器由此游戏手柄控制（不传则全部手柄都监听），可在监听手柄连接（`onConnected`）时获取
 
 案例：
 
@@ -240,7 +272,7 @@ switchGamepadController(drawerController.id)
 // switchGamepadController([drawerController.id,popController.id]) 
 ```
 
-## recallController
+## rollbackController
 
 回溯controller
 
@@ -249,7 +281,7 @@ import {
   createGamepadController,
   XBOX_KEY_MAP,
   INPUT_TYPE,
-  recallController,
+  rollbackController,
   switchGamepadController
 } from 'web-gamepad'
 const dialogVisible = ref(false)
@@ -269,8 +301,20 @@ function open() {
 
 // 当关闭弹窗是，回退前1位激活的controllers
 function handleClose() {
-  recallController(1)
+  rollbackController(1)
 }
+```
+
+## getRollbackStack
+
+获取回溯栈
+
+```ts
+import {
+ getRollbackStack
+} from 'web-gamepad'
+
+getRollbackStack() // {id: string;btnStatusMap: {[key: number]: boolean;};}[][]
 ```
 
 ## getActiveControllers
@@ -397,6 +441,18 @@ getGamepadList
 } from 'web-gamepad'
 initGamepad()
 getGamepadList() // [gamepad,...]
+```
+
+## getGamepadByIndex
+
+通过gamepadIndex获取游戏手柄
+
+```ts
+import {
+getGamepadByIndex
+} from 'web-gamepad'
+initGamepad()
+getGamepadByIndex(0) // gamepad | undefined
 ```
 
 ## stopListening

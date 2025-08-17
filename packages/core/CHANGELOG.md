@@ -1,5 +1,12 @@
 # web-gamepad
 
+## 1.1.0
+
+### Minor Changes
+
+- controller add gamepad limit
+  - add switch key map
+
 ## 1.0.6
 
 ### Patch Changes
@@ -22,7 +29,7 @@
 
 ### Patch Changes
 
-- add recall functions
+- add rollback functions
 
 ## 1.0.2
 
