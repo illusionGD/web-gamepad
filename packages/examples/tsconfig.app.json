@@ -1,6 +1,10 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
+    /* @en Resolve live workspace types for editor hints. @zh 编辑器直接读取工作区源码类型。 */
+    "paths": {
+      "web-gamepad": ["../core/src/index.ts"]
+    },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
 
     /* Linting */

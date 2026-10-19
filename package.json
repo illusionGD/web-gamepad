@@ -1,5 +1,5 @@
 {
-  "name": "web-gamepad",
+  "name": "web-gamepad-workspace",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,7 +11,10 @@
     "push": "npm run commit && git push --follow-tags",
     "prepare": "husky install",
     "release": "node ./scripts/copyReadme.mjs && changeset add && changeset version",
-    "publish:release": "npm run release && npm run push"
+    "publish:release": "npm run release && npm run push",
+    "build": "pnpm --filter ./packages/core build && pnpm --filter ./packages/examples build",
+    "test": "pnpm --filter ./packages/core test",
+    "typecheck": "pnpm --filter ./packages/core typecheck && pnpm --filter ./packages/examples exec vue-tsc -b"
   },
   "keywords": [],
   "author": "",
@@ -37,7 +40,5 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "dependencies": {
-    "web-gamepad": "workspace:^"
-  }
+  "private": true
 }
